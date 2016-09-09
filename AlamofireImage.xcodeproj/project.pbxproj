@@ -491,6 +491,7 @@
 		4CFB86631CA3656F007CE085 /* UIButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF24CF3C1C253CA000904E85 /* UIButtonTests.swift */; };
 		4CFC0A061AB4FEC90004D0B8 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFC0A051AB4FEC90004D0B8 /* ImageCache.swift */; };
 		4CFC0A091AB52BD90004D0B8 /* ImageFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFC0A081AB52BD90004D0B8 /* ImageFilter.swift */; };
+		64CB2CF21D82EC5000332E2E /* YLGIFImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64CB2CEF1D82EC3400332E2E /* YLGIFImage.framework */; };
 		CF24CF421C253CB100904E85 /* UIButton+AlamofireImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF24CF411C253CB100904E85 /* UIButton+AlamofireImage.swift */; };
 		CF24CF461C253D4F00904E85 /* UIButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF24CF3C1C253CA000904E85 /* UIButtonTests.swift */; };
 /* End PBXBuildFile section */
@@ -593,6 +594,34 @@
 			proxyType = 1;
 			remoteGlobalIDString = 4CE611281AABC24E00D35044;
 			remoteInfo = "AlamofireImage OSX";
+		};
+		64CB2CEA1D82EC3400332E2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 64CB2CE01D82EC3300332E2E /* YLGIFImageSwiftDemo.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4E8046BA19447FB6007EFB50;
+			remoteInfo = YLGIFImageSwiftDemo;
+		};
+		64CB2CEC1D82EC3400332E2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 64CB2CE01D82EC3300332E2E /* YLGIFImageSwiftDemo.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4E8046CC19447FB6007EFB50;
+			remoteInfo = YLGIFImageSwiftDemoTests;
+		};
+		64CB2CEE1D82EC3400332E2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 64CB2CE01D82EC3300332E2E /* YLGIFImageSwiftDemo.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 64E760461D3BE31100E60752;
+			remoteInfo = YLGIFImage;
+		};
+		64CB2CF01D82EC4300332E2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 64CB2CE01D82EC3300332E2E /* YLGIFImageSwiftDemo.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 64E760451D3BE31100E60752;
+			remoteInfo = YLGIFImage;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -761,6 +790,7 @@
 		4CEBB53F1B93C622001391DE /* ImageCacheTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCacheTests.swift; sourceTree = "<group>"; };
 		4CFC0A051AB4FEC90004D0B8 /* ImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		4CFC0A081AB52BD90004D0B8 /* ImageFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageFilter.swift; sourceTree = "<group>"; };
+		64CB2CE01D82EC3300332E2E /* YLGIFImageSwiftDemo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YLGIFImageSwiftDemo.xcodeproj; path = "Carthage/Checkouts/YLGIFImage-Swift/YLGIFImageSwiftDemo/YLGIFImageSwiftDemo.xcodeproj"; sourceTree = "<group>"; };
 		CF24CF3C1C253CA000904E85 /* UIButtonTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIButtonTests.swift; sourceTree = "<group>"; };
 		CF24CF411C253CB100904E85 /* UIButton+AlamofireImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIButton+AlamofireImage.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -794,6 +824,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64CB2CF21D82EC5000332E2E /* YLGIFImage.framework in Frameworks */,
 				4CE5AABB1B9BF104003530D6 /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1129,6 +1160,7 @@
 				4C54EE8E1AABC04900CD894C /* Source */,
 				4C54EE941AABC08B00CD894C /* Tests */,
 				4C9043781AABBFC5001B4E60 /* Products */,
+				64CB2CE01D82EC3300332E2E /* YLGIFImageSwiftDemo.xcodeproj */,
 				4CE5AAA61B9BF099003530D6 /* Alamofire.xcodeproj */,
 			);
 			sourceTree = "<group>";
@@ -1201,6 +1233,16 @@
 				4CE611541AABC8D900D35044 /* Request+AlamofireImage.swift */,
 			);
 			name = Alamofire;
+			sourceTree = "<group>";
+		};
+		64CB2CE11D82EC3300332E2E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				64CB2CEB1D82EC3400332E2E /* YLGIFImageSwiftDemo.app */,
+				64CB2CED1D82EC3400332E2E /* YLGIFImageSwiftDemoTests.xctest */,
+				64CB2CEF1D82EC3400332E2E /* YLGIFImage.framework */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1309,6 +1351,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				64CB2CF11D82EC4300332E2E /* PBXTargetDependency */,
 				4CE5AABA1B9BF0F6003530D6 /* PBXTargetDependency */,
 			);
 			name = "AlamofireImage iOS";
@@ -1428,6 +1471,10 @@
 					ProductGroup = 4CE5AAA71B9BF099003530D6 /* Products */;
 					ProjectRef = 4CE5AAA61B9BF099003530D6 /* Alamofire.xcodeproj */;
 				},
+				{
+					ProductGroup = 64CB2CE11D82EC3300332E2E /* Products */;
+					ProjectRef = 64CB2CE01D82EC3300332E2E /* YLGIFImageSwiftDemo.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -1491,6 +1538,27 @@
 			fileType = wrapper.cfbundle;
 			path = "Alamofire OSX Tests.xctest";
 			remoteRef = 4CE5AAB61B9BF09A003530D6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		64CB2CEB1D82EC3400332E2E /* YLGIFImageSwiftDemo.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = YLGIFImageSwiftDemo.app;
+			remoteRef = 64CB2CEA1D82EC3400332E2E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		64CB2CED1D82EC3400332E2E /* YLGIFImageSwiftDemoTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = YLGIFImageSwiftDemoTests.xctest;
+			remoteRef = 64CB2CEC1D82EC3400332E2E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		64CB2CEF1D82EC3400332E2E /* YLGIFImage.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = YLGIFImage.framework;
+			remoteRef = 64CB2CEE1D82EC3400332E2E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2112,6 +2180,11 @@
 			isa = PBXTargetDependency;
 			target = 4CE611281AABC24E00D35044 /* AlamofireImage OSX */;
 			targetProxy = 4CE6114E1AABC5C900D35044 /* PBXContainerItemProxy */;
+		};
+		64CB2CF11D82EC4300332E2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = YLGIFImage;
+			targetProxy = 64CB2CF01D82EC4300332E2E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

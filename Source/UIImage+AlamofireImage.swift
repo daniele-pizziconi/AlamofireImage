@@ -28,6 +28,7 @@ import UIKit
 
 #if os(iOS) || os(tvOS)
 import CoreImage
+import YLGIFImage
 #endif
 
 // MARK: Initialization
@@ -46,7 +47,7 @@ extension UIImage {
     /// - returns: An initialized `UIImage` object, or `nil` if the method failed.
     public static func af_threadSafeImage(with data: Data) -> UIImage? {
         lock.lock()
-        let image = UIImage(data: data)
+        let image = YLGIFImage(data: data)
         lock.unlock()
 
         return image
@@ -66,7 +67,7 @@ extension UIImage {
     /// - returns: An initialized `UIImage` object, or `nil` if the method failed.
     public static func af_threadSafeImage(with data: Data, scale: CGFloat) -> UIImage? {
         lock.lock()
-        let image = UIImage(data: data, scale: scale)
+        let image = YLGIFImage(data: data, scale: scale)
         lock.unlock()
 
         return image

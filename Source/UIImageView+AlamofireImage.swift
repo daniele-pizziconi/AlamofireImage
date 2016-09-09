@@ -25,6 +25,8 @@
 import Alamofire
 import Foundation
 import UIKit
+import CoreLocation
+import MapKit
 
 extension UIImageView {
 
@@ -121,7 +123,9 @@ extension UIImageView {
     private struct AssociatedKey {
         static var imageDownloader = "af_UIImageView.ImageDownloader"
         static var sharedImageDownloader = "af_UIImageView.SharedImageDownloader"
+        static var mapSnapshotter = "af_UIImageView.MapSnapshotter"
         static var activeRequestReceipt = "af_UIImageView.ActiveRequestReceipt"
+        static var activeRequestLocation = "af_UIImageView.ActiveRequestLocation"
     }
 
     // MARK: - Associated Properties
@@ -155,6 +159,16 @@ extension UIImageView {
         }
     }
 
+    /// The instance map snapshotter used to download all location images.
+    public var af_mapSnapshotter: MKMapSnapshotter? {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKey.mapSnapshotter) as? MKMapSnapshotter
+        }
+        set(snapshotter) {
+            objc_setAssociatedObject(self, &AssociatedKey.mapSnapshotter, snapshotter, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
     var af_activeRequestReceipt: RequestReceipt? {
         get {
             return objc_getAssociatedObject(self, &AssociatedKey.activeRequestReceipt) as? RequestReceipt
@@ -164,7 +178,145 @@ extension UIImageView {
         }
     }
 
+    var af_activeRequestLocation: String? {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKey.activeRequestLocation) as? String
+        }
+        set {
+            objc_setAssociatedObject(self, &AssociatedKey.activeRequestLocation, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
     // MARK: - Image Download
+
+    /// Asynchronously downloads an image from the specified URL, applies the specified image filter to the downloaded
+    /// image and sets it once finished while executing the image transition.
+    ///
+    /// If the image is cached locally, the image is set immediately. Otherwise the specified placehoder image will be
+    /// set immediately, and then the remote image will be set once the image request is finished.
+    ///
+    /// The `completion` closure is called after the image download and filtering are complete, but before the start of
+    /// the image transition. Please note it is no longer the responsibility of the `completion` closure to set the
+    /// image. It will be set automatically. If you require a second notification after the image transition completes,
+    /// use a `.Custom` image transition with a `completion` closure. The `.Custom` `completion` closure is called when
+    /// the image transition is finished.
+    ///
+    /// - parameter location:                   The CLLocation used for the image request.
+    /// - parameter placeholderImage:           The image to be set initially until the image request finished. If
+    ///                                         `nil`, the image view will not change its image until the image
+    ///                                         request finishes. Defaults to `nil`.
+    /// - parameter filter:                     The image filter applied to the image after the image request is
+    ///                                         finished. Defaults to `nil`.
+    /// - parameter region:                     The region of the location to be captured.
+    /// - parameter snapshotSize:               The size of the snapshot.
+    /// - parameter imageTransition:            The image transition animation applied to the image when set.
+    /// - parameter queue:                      The dispatch queue to call the progress closure on. Defaults to the
+    ///                                         main queue.
+    /// - parameter imageTransition:            The image transition animation applied to the image when set.
+    ///                                         Defaults to `.None`.
+    /// - parameter runImageTransitionIfCached: Whether to run the image transition if the image is cached. Defaults
+    ///                                         to `false`.
+    /// - parameter completion:                 A closure to be executed when the image request finishes. The closure
+    ///                                         has no return value and takes three arguments: the original request,
+    ///                                         the response from the server and the result containing either the
+    ///                                         image or the error that occurred. If the image was returned from the
+    ///                                         image cache, the response will be `nil`. Defaults to `nil`.
+    public func af_setImage(
+        withLocation location: CLLocation,
+        placeholderImage: UIImage? = nil,
+        filter: ImageFilter? = nil,
+        region: MKCoordinateRegion,
+        snapshotSize: CGSize,
+        queue: DispatchQueue = DispatchQueue.main,
+        imageTransition: ImageTransition = .noTransition,
+        runImageTransitionIfCached: Bool = false,
+        completion: ((LocationResponse<UIImage, NSError>) -> Void)? = nil)
+    {
+        let request = locationRequest(with: location)
+        guard !isLocationRequestEqualToActiveRequestLocation(request) else { return }
+
+        af_cancelImageRequest()
+
+        let imageDownloader = af_imageDownloader ?? UIImageView.af_sharedImageDownloader
+        let imageCache = imageDownloader.imageCache
+
+        // Use the image from the image cache if it exists
+        if let image = imageCache?.image(for: request, withIdentifier: filter?.identifier) {
+            let response = LocationResponse<UIImage, NSError>(
+                location: location,
+                snapshot: nil,
+                result: .success(image)
+            )
+
+            completion?(response)
+
+            if runImageTransitionIfCached {
+                let tinyDelay = DispatchTime.now() + Double(Int64(0.001 * Float(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+
+                // Need to let the runloop cycle for the placeholder image to take affect
+                DispatchQueue.main.asyncAfter(deadline: tinyDelay) {
+                    self.run(imageTransition, with: image)
+                }
+            } else {
+                self.image = image
+            }
+
+            return
+        }
+
+        if af_mapSnapshotter == nil {
+            let options = MKMapSnapshotOptions()
+            options.region = region
+            options.size = snapshotSize
+            options.scale = UIScreen.main.scale
+            af_mapSnapshotter = MKMapSnapshotter(options: options)
+        }
+
+        // Set the placeholder since we're going to have to download
+        if let placeholderImage = placeholderImage { self.image = placeholderImage }
+
+        af_mapSnapshotter!.start(with: queue) {[weak self] snapshot, error in
+            guard let strongSelf = self else { return }
+
+            guard let snapshot = snapshot else {
+                DispatchQueue.main.async {
+                    let response = LocationResponse<UIImage, NSError>(
+                        location: location,
+                        snapshot: nil,
+                        result: .failure(error as! NSError)
+                    )
+                    completion?(response)
+                }
+                return
+            }
+
+            let pin = MKPinAnnotationView(annotation: nil, reuseIdentifier: nil)
+            let image = snapshot.image
+
+            UIGraphicsBeginImageContextWithOptions(image.size, true, image.scale)
+            image.draw(at: CGPoint.zero)
+
+            let visibleRect = CGRect(origin: CGPoint.zero, size: image.size)
+            var point = snapshot.point(for: location.coordinate)
+            if visibleRect.contains(point) {
+                point.x = point.x + pin.centerOffset.x - (pin.bounds.size.width / 2)
+                point.y = point.y + pin.centerOffset.y - (pin.bounds.size.height / 2)
+                pin.image?.draw(at: point)
+            }
+
+            let compositeImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            if let image = compositeImage {
+                imageCache?.addImage(image, for: request, withIdentifier: filter?.identifier)
+                DispatchQueue.main.async {
+                    strongSelf.run(imageTransition, with: image)
+                }
+            }
+            strongSelf.af_activeRequestLocation = nil
+        }
+
+        self.af_activeRequestLocation = request
+    }
 
     /// Asynchronously downloads an image from the specified URL, applies the specified image filter to the downloaded
     /// image and sets it once finished while executing the image transition.
@@ -332,12 +484,18 @@ extension UIImageView {
 
     /// Cancels the active download request, if one exists.
     public func af_cancelImageRequest() {
+        self.af_cancelLocationRequest()
         guard let activeRequestReceipt = af_activeRequestReceipt else { return }
 
         let imageDownloader = af_imageDownloader ?? UIImageView.af_sharedImageDownloader
         imageDownloader.cancelRequest(with: activeRequestReceipt)
 
         af_activeRequestReceipt = nil
+    }
+
+    private func af_cancelLocationRequest() {
+        af_mapSnapshotter?.cancel()
+        af_activeRequestLocation = nil
     }
 
     // MARK: - Image Transition
@@ -379,5 +537,52 @@ extension UIImageView {
         }
 
         return false
+    }
+
+    private func locationRequest(with location: CLLocation) -> String {
+        return "\(location.coordinate.latitude);\(location.coordinate.longitude)"
+    }
+
+    private func isLocationRequestEqualToActiveRequestLocation(_ locationRequest: String?) -> Bool {
+        if
+            let currentRequest = af_activeRequestLocation,
+            currentRequest == locationRequest
+        {
+            return true
+        }
+
+        return false
+    }
+}
+
+/// Used to store the response data returned from a completed `Request`.
+public struct LocationResponse<ValueType, ErrorType: Error> {
+    /// The location request.
+    public let location: CLLocation?
+
+    /// The snapshot returned.
+    public let snapshot: MKMapSnapshot?
+
+    /// The result of response serialization.
+    public let result: Result<ValueType>
+
+    /**
+     Initializes the `Response` instance with the specified URL request, URL response, server data and response
+     serialization result.
+
+     - parameter location: The location request sent to the server.
+     - parameter snapshot: The snapshot returned by the server.
+     - parameter result:   The result of response serialization.
+
+     - returns: the new `Response` instance.
+     */
+    public init(
+        location: CLLocation?,
+        snapshot: MKMapSnapshot?,
+        result: Result<ValueType>)
+    {
+        self.location = location
+        self.snapshot = snapshot
+        self.result = result
     }
 }
