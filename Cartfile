@@ -1,2 +1,2 @@
-github "Alamofire/Alamofire" "master"
+github "Alamofire/Alamofire" ~> 4.0
 github "daniele-pizziconi/YLGIFImage-Swift" "master"
